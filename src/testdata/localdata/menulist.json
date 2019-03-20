@@ -1,24 +1,14 @@
 {
   "result": 0,
   "list": [{
-      "key": "dashboard",
-      "name": "首页",
+      "key": "item1",
+      "name": "item1",
       "icon": "home"
     },
     {
-      "key": "ztmonitor",
-      "name": "实时监控",
+      "key": "item2",
+      "name": "item2",
       "icon": "environment-o"
-    },
-    {
-      "key": "ztdevconfig",
-      "name": "设备配置",
-      "icon": "setting"
-    },
-    {
-      "key": "historyalert",
-      "name": "历史告警",
-      "icon": "bell"
     }
   ]
 }

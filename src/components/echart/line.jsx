@@ -1,12 +1,14 @@
 import React, { Component } from 'react';
 import echarts from 'echarts';
-import PropTypes from 'prop-types';
+// import PropTypes from 'prop-types';
+import $ from 'jquery';
 
 
 class PageComponent extends Component {
-  constructor(props) {
-    super(props);
-  }
+  // constructor(props) {
+  //  super(props);
+  // }
+
   componentDidMount() {
     window[this.props.id] = echarts.init(document.getElementById(this.props.id));
     this.initLines();
@@ -30,6 +32,7 @@ class PageComponent extends Component {
 
   initLines() {
     const { param } = this.props;
+    console.log(123456);
     const tempArry = [];
     param.serrydata.map((item) => {
       const tempObj = {};
@@ -52,6 +55,7 @@ class PageComponent extends Component {
       }
       tempObj.data = item.data;
       tempArry.push(tempObj);
+      return tempArry;
     });
     const option = {
       title: {
@@ -143,7 +147,7 @@ class PageComponent extends Component {
   }
 }
 
-PageComponent.propTypes = {
-  // param: PropTypes.object().isRequired
-};
+// PageComponent.propTypes = {
+//  // param: PropTypes.object().isRequired
+// };
 export default PageComponent;

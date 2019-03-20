@@ -28,9 +28,7 @@ export default class Tablestore3 {
           }
         }
         if (data.data) {
-          data.data.map((item, index) => {
-            item.key = index + 1;
-          });
+          data.data.map((item, index) => item.key = index + 1);
           tempObj.list = data.data;
         }
         storeThis.dataObj = tempObj;
@@ -39,6 +37,7 @@ export default class Tablestore3 {
     };
     Ajax.fetch(params);
   }
+
   handleUser(param) {
     const params = {
       ...param
@@ -52,6 +51,7 @@ export default class Tablestore3 {
     };
     Ajax.fetch(params);
   }
+
   lastUser(param) {
     const params = {
       successFn: (data) => {
@@ -71,21 +71,21 @@ export default class Tablestore3 {
   }
 
   doUploadFiles(param) {
-    const that = this;
     const params = {
       ...param
     };
     // console.log(params);
     Ajax.upload(params);
   }
+
   synchronization(param) {
-    const that = this;
     const params = {
       ...param
     };
     // console.log(params);
     Ajax.fetch(params);
   }
+
   modifyStatus(param) {
     // console.log(param);
     Ajax.fetch(param);

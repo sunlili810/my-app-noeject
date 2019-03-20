@@ -1,119 +1,88 @@
-import $ from 'jquery';
+import axios from 'axios';
 import modal from 'components/modal/modal';
-import 'util/mockdata';
-import ErrorCode from './errorcode';
 
-// const expire = 15 * 60 * 1000;
-let dialogId = 0;
+const baseUrl = window.apiUrl;
 export default class AJAX {
-  static localData = require('util/localdata');
-
-  static getEnvPrefix() {
-    if (window.isDebug) {
-      return '';
-    }
-    return window.apiUrl;
-  }
-
-  static fetch(fetchObj) {
+  static fetch(options) {
     const {
-      loadingFlag,
-      method,
+      method = 'get',
       successFn,
       errorFn
-    } = fetchObj;
-    let {
-      url,
-      data = {}
-    } = fetchObj;
-    if (loadingFlag) {
-      dialogId = modal.showModel({
-        type: 'loading'
-      });
-    }
-
-    // if (url.split('/')[1] !== 'login') {
-    //   const time = localStorage.getItem('time');
-    //   if ((new Date().getTime() - time) > expire) {
-    //     // console.log('登录信息已过期！');
-    //     window.location.href = '/';
-    //   }
-    // }
-    if (window.isDebug) {
-      setTimeout(() => {
-        if (loadingFlag) {
-          modal.closeModel(dialogId);
-        }
-        const localData = AJAX.localData[url];
-        if (localData.result === 0) {
-          successFn(localData);
-        } else if (localData.result === 1001) {
-          // console.log('登录信息已过期！');
-          window.location.href = '/';
-        } else {
-          const errorMsg = ErrorCode(localData.code) || '服务器异常,请联系运维人员!';
-          if (errorFn) {
-            errorFn(errorMsg);
-          } else {
-            AJAX.modalError(errorMsg); // ajax错误统一处理
-          }
-        }
-      }, 500);
-      return;
-    }
-
-    url = AJAX.getEnvPrefix() + url;
-
+    } = options;
+    let { data, url } = options;
+    url = baseUrl + url;
     if (method.toLowerCase() === 'get') {
       data = null;
-    } else {
-      data = JSON.stringify(data);
     }
-
-    $.ajax({
+    // else {
+    // data = JSON.stringify(data);
+    // }
+    const tempData = AJAX.isExisty(data) ? data : {};
+    const tempData2 = Object.assign({}, tempData, { projectid: window.projectid });
+    axios({
       method,
       url,
-      data: {
-        req: AJAX.isExisty(data) ? data : ''
-      },
-      headers: {
-        Accept: 'application/json'
-        // 'Content-Type': 'application/json'
-      },
-      dataType: 'json',
-      traditional: true,
-      xhrFields: {
-        withCredentials: true
-      },
-      crossDomain: true,
-      success(result) {
-        if (loadingFlag) {
-          modal.closeModel(dialogId);
-        }
-        if (result.result === 0) {
-          successFn(result);
-        } else if (result.result === 1001) {
-          // console.log('登录信息已过期！');
-          window.location.href = '/';
-        } else if (result.result === 1010) {
-          // console.log(result.detail);
-        } else {
-          const errorMsg = ErrorCode(result.result) || '服务器异常,请联系运维人员!';
-          if (errorFn) {
-            errorFn(errorMsg);
+      // headers: { 'Content-Type': 'application/json;charset=UTF-8'},
+      // headers: { 'content-type': 'application/x-www-form-urlencoded' },
+      withCredentials: true,
+      data: tempData2,
+      transformRequest: [function (dataOld) {
+        let ret = '';
+        for (const it in dataOld) {
+          let tempValue = null;
+          if (Array.isArray(dataOld[it])) {
+            tempValue = JSON.stringify(dataOld[it]);
+          } else if (typeof dataOld[it] === 'object') {
+            tempValue = JSON.stringify(dataOld[it]);
           } else {
-            AJAX.modalError(errorMsg);
+            tempValue = dataOld[it];
           }
+          // ret += `${encodeURIComponent(it)}=${encodeURIComponent(dataOld[it])}&`;
+          ret += `${encodeURIComponent(it)}=${encodeURIComponent(tempValue)}&`;
         }
-      },
-      error(...args) {
+        return ret;
+      }]
+    })
+      .then((response) => {
+        if (successFn) {
+          successFn(response.data);
+        }
+      }).catch((error) => {
         if (errorFn) {
-          errorFn(args);
+          errorFn(error);
         } else {
-          AJAX.modalError(args);
+          AJAX.modalError(error);
         }
-      }
-    });
+      });
+  }
+
+  static fetchUpload(options) {
+    const {
+      method = 'get',
+      successFn,
+      errorFn,
+      data
+    } = options;
+    data.append('projectid', window.projectid);
+    let { url } = options;
+    url = baseUrl + url;
+    axios({
+      method,
+      url,
+      withCredentials: true,
+      data
+    })
+      .then((response) => {
+        if (successFn) {
+          successFn(response.data);
+        }
+      }).catch((error) => {
+        if (errorFn) {
+          errorFn(error);
+        } else {
+          AJAX.modalError(error);
+        }
+      });
   }
 
 
@@ -139,88 +108,6 @@ export default class AJAX {
     return modal.showModel({
       type: 'success',
       message
-    });
-  }
-
-  static upload(fetchObj) {
-    const {
-      loadingFlag,
-      method,
-      successFn,
-      errorFn,
-      data
-    } = fetchObj;
-    let {
-      url
-    } = fetchObj;
-    if (loadingFlag) {
-      modal.showModel({
-        type: 'loading'
-      });
-    }
-    if (window.isDebug) {
-      setTimeout(() => {
-        if (loadingFlag) {
-          modal.closeModel(dialogId);
-        }
-        const localData = AJAX.localData[url];
-        if (localData.result === 0) {
-          successFn(localData);
-        } else if (localData.result === 1001) {
-          // console.log('登录信息已过期！');
-          window.location.href = '/';
-        } else {
-          const errorMsg = ErrorCode(localData.code) || '服务器异常,请联系运维人员!';
-          if (errorFn) {
-            errorFn(errorMsg);
-          } else {
-            AJAX.modalError(errorMsg); // ajax错误统一处理
-          }
-        }
-      }, 500);
-      return;
-    }
-
-    url = AJAX.getEnvPrefix() + url;
-
-    $.ajax({
-      method,
-      url,
-      data,
-      async: true,
-      cache: false,
-      contentType: false,
-      processData: false,
-      traditional: true,
-      xhrFields: {
-        withCredentials: true
-      },
-      crossDomain: true,
-      success(result) {
-        if (loadingFlag) {
-          modal.closeModel(dialogId);
-        }
-        if (result.result === 0) {
-          successFn(result);
-        } else if (result.result === 1001) {
-          // console.log('登录信息已过期！');
-          window.location.href = '/';
-        } else {
-          const errorMsg = ErrorCode(result.result) || '服务器异常,请联系运维人员!';
-          if (errorFn) {
-            errorFn(errorMsg);
-          } else {
-            AJAX.modalError(errorMsg);
-          }
-        }
-      },
-      error(...args) {
-        if (errorFn) {
-          errorFn(args);
-        } else {
-          AJAX.modalError(args);
-        }
-      }
     });
   }
 }
