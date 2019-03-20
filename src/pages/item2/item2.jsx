@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
-
+import Layout from 'components/layout/layout';
 
 class PageComponent extends Component {
   render() {
     return (
-      <div className="item2">
-        <div className="container-out">
+      <Layout name="item2">
+        <div className="item2">
 
         ----800000000000
         </div>
-      </div>
+      </Layout>
     );
   }
 }
