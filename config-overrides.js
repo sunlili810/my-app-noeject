@@ -1,27 +1,71 @@
-const { injectBabelPlugin } = require('react-app-rewired');
-const rewireLess = require('react-app-rewire-less');
-// const path = require('path');
+const path = require('path');
+const {
+  override, fixBabelImports, addLessLoader, useBabelRc, addWebpackAlias, addDecoratorsLegacy, disableEsLint
+} = require('customize-cra');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const ProgressBarPlugin = require('progress-bar-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 
-module.exports = function override(config, env) {
-  config = injectBabelPlugin(
-    ['import', { libraryName: 'antd', libraryDirectory: 'es', style: true }], // change importing css to less
-    config,
-  );
-  config = rewireLess.withLoaderOptions({
-    modifyVars: { '@primary-color': '#1DA57A' },
-    javascriptEnabled: true
-  })(config, env);
-
-  config = injectBabelPlugin(
-    ['@babel/plugin-proposal-decorators', { legacy: true }],
-    config,
-  );
-  //
-  // const babelLoader = getBabelLoader(config.module.rules);
-  // const pwd = path.resolve();
-  // babelLoader.include = [path.normalize(`${pwd}/src`)];
-  // // use babelrc
-  // babelLoader.options.babelrc = true;
-
+const BundleAnalyzerPluginWebpack = (config) => {
+  config.mode === 'production' ? config.plugins.push(new BundleAnalyzerPlugin()) : '';
   return config;
 };
+const ProgressBarPluginWebpack = (config) => {
+  config.mode === 'production' ? config.plugins.push(new ProgressBarPlugin({
+    format: '  build [:bar] :percent (:elapsed seconds)',
+    clear: false,
+    width: 60
+  })) : '';
+  return config;
+};
+const UglifyJsPluginWebpack = (config) => {
+  config.mode === 'production' ? config.plugins.push(new UglifyJsPlugin({
+    uglifyOptions: {
+      ie8: false,
+      ecma: 8,
+      mangle: true,
+      output: {
+        comments: false,
+        beautify: false
+      },
+      compress: true,
+      warnings: false
+    }
+  })) : '';
+  return config;
+};
+module.exports = override(
+  fixBabelImports('import', {
+    libraryName: 'antd',
+    libraryDirectory: 'es',
+    style: true
+  }),
+  disableEsLint(),
+  addDecoratorsLegacy(),
+  BundleAnalyzerPluginWebpack,
+  ProgressBarPluginWebpack,
+  UglifyJsPluginWebpack,
+  addWebpackAlias({
+    components: path.join(__dirname, './src/components'),
+    images: path.join(__dirname, './src/res/images'),
+    medias: path.join(__dirname, './src/res/media'),
+    iconfonts: path.join(__dirname, './src/res/iconfont'),
+    // media: path.join(__dirname, '../res/media'),
+    pages: path.join(__dirname, './src/pages'),
+    localData: path.join(__dirname, './src/testdata/localdata'),
+    mockData: path.join(__dirname, './src/testdata/mockdata'),
+    util: path.join(__dirname, './src/utils'),
+    store: path.join(__dirname, './src/store')
+  }),
+  addLessLoader({
+    javascriptEnabled: true,
+    modifyVars: {
+      '@primary-color': '#1581BF',
+      '@layout-footer-background': '#252d3a',
+      '@layout-trigger-background': '#fff',
+      '@layout-trigger-color': '#252d3a',
+      '@layout-sider-background': '#fff'
+    }
+  }),
+  useBabelRc()
+);
