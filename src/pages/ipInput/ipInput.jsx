@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
-  Input, Col, Row, Form
+  Input, Col, Row
 } from 'antd';
 import './ipInput.less';
 class pageComponent extends Component {
