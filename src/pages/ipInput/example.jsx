@@ -6,7 +6,6 @@ import { observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import IPut from './ipInput';
 
-const { Option } = Select;
 const FormItem = Form.Item;
 const formItemLayout = {
   labelCol: {
@@ -26,8 +25,6 @@ class modalComponent extends Component {
 
 
   handleOk() {
-    const { param } = this.props;
-    const { lockid } = param;
     this.props.form.validateFields((errors, values) => {
       console.log(values);
       if (errors) {
@@ -35,7 +32,6 @@ class modalComponent extends Component {
       }
       const data = {
         ...values,
-        lockid: lockid || ''
       };
       this.props.onTrigger('okBtn', data);
     });
